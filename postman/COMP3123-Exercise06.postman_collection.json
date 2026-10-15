@@ -1,0 +1,172 @@
+{
+  "info": {
+    "name": "COMP3123 Exercise 06 - Notes API",
+    "description": "CRUD requests for the COMP3123 MongoDB notes exercise. Run Create note first; its response stores noteId for the other requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "noteId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Welcome",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/"
+      }
+    },
+    {
+      "name": "Create note",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Created (201)', () => pm.response.to.have.status(201));",
+              "const note = pm.response.json();",
+              "pm.expect(note._id).to.be.a('string');",
+              "pm.collectionVariables.set('noteId', note._id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": {\n    \"noteTitle\": \"COMP3123 Exercise 06\",\n    \"noteDescription\": \"Created using the Postman collection\",\n    \"priority\": \"HIGH\",\n    \"dateAdded\": \"15/Oct/2026\",\n    \"dateUpdated\": \"15/Oct/2026\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/notes"
+      }
+    },
+    {
+      "name": "Get all notes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('List returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response is an array of notes', () => pm.expect(pm.response.json()).to.be.an('array'));",
+              "pm.test('Created note appears in list', () => pm.expect(pm.response.json().some(note => note._id === pm.collectionVariables.get('noteId'))).to.equal(true));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/notes"
+      }
+    },
+    {
+      "name": "Get note by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Get by ID returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response contains the requested note', () => pm.expect(pm.response.json()._id).to.equal(pm.collectionVariables.get('noteId')));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "Update note",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Update returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Updated title is returned', () => pm.expect(pm.response.json().noteTitle).to.equal('COMP3123 Exercise 06 - Updated'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": {\n    \"noteTitle\": \"COMP3123 Exercise 06 - Updated\",\n    \"noteDescription\": \"Updated using the Postman collection\",\n    \"priority\": \"MEDIUM\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "Delete note",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Delete returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Delete confirmation is returned', () => pm.expect(pm.response.json().message).to.equal('Note deleted successfully'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "Deleted note returns 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Deleted note is no longer found', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    }
+  ]
+}
